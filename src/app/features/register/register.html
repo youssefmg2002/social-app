@@ -1,0 +1,198 @@
+<h2 class="text-2xl font-extrabold text-slate-900">Create a new account</h2>
+<p class="mt-1 text-sm text-slate-500">It is quick and easy.</p>
+
+<form [formGroup]="registerForm" (ngSubmit)="submitData()" novalidate class="mt-5 space-y-3.5">
+  <!-- Full Name -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-regular fa-user text-base"></i>
+      </span>
+      <input
+        type="text"
+        name="name"
+        formControlName="name"
+        placeholder="Full name"
+        maxlength="30"
+        class="w-full rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('name')"
+        [class.focus:border-red-500]="hasError('name')"
+        [class.border-slate-200]="!hasError('name')"
+        [class.focus:border-[#00298d]]="!hasError('name')"
+      />
+    </div>
+    @if (getErrorMessage('name')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('name') }}</p>
+    }
+  </div>
+
+  <!-- Username (optional) -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-at text-base"></i>
+      </span>
+      <input
+        type="text"
+        name="username"
+        formControlName="username"
+        placeholder="Username (optional)"
+        maxlength="30"
+        class="w-full rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('username')"
+        [class.focus:border-red-500]="hasError('username')"
+        [class.border-slate-200]="!hasError('username')"
+        [class.focus:border-[#00298d]]="!hasError('username')"
+      />
+    </div>
+    @if (getErrorMessage('username')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('username') }}</p>
+    }
+  </div>
+
+  <!-- Email Address -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-at text-base"></i>
+      </span>
+      <input
+        type="email"
+        name="email"
+        formControlName="email"
+        placeholder="Email address"
+        class="w-full rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('email')"
+        [class.focus:border-red-500]="hasError('email')"
+        [class.border-slate-200]="!hasError('email')"
+        [class.focus:border-[#00298d]]="!hasError('email')"
+      />
+    </div>
+    @if (getErrorMessage('email')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('email') }}</p>
+    }
+  </div>
+
+  <!-- Gender Select -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-users text-base"></i>
+      </span>
+      <select
+        name="gender"
+        formControlName="gender"
+        class="w-full cursor-pointer appearance-none rounded-xl border bg-slate-50 py-3 pl-11 pr-10 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('gender')"
+        [class.focus:border-red-500]="hasError('gender')"
+        [class.border-slate-200]="!hasError('gender')"
+        [class.focus:border-[#00298d]]="!hasError('gender')"
+      >
+        <option value="" disabled selected>Select gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <span class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-chevron-down text-xs"></i>
+      </span>
+    </div>
+    @if (getErrorMessage('gender')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('gender') }}</p>
+    }
+  </div>
+
+  <!-- Date of Birth -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-regular fa-calendar text-base"></i>
+      </span>
+      <input
+        type="date"
+        name="dateOfBirth"
+        formControlName="dateOfBirth"
+        placeholder="Date of birth"
+        class="w-full cursor-pointer rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('dateOfBirth')"
+        [class.focus:border-red-500]="hasError('dateOfBirth')"
+        [class.border-slate-200]="!hasError('dateOfBirth')"
+        [class.focus:border-[#00298d]]="!hasError('dateOfBirth')"
+      />
+    </div>
+    @if (getErrorMessage('dateOfBirth')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('dateOfBirth') }}</p>
+    }
+  </div>
+
+  <!-- Password -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-key text-base"></i>
+      </span>
+      <input
+        type="password"
+        name="password"
+        formControlName="password"
+        placeholder="Password"
+        class="w-full rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('password')"
+        [class.focus:border-red-500]="hasError('password')"
+        [class.border-slate-200]="!hasError('password')"
+        [class.focus:border-[#00298d]]="!hasError('password')"
+      />
+    </div>
+    @if (getErrorMessage('password')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('password') }}</p>
+    }
+  </div>
+
+  <!-- Confirm Password -->
+  <div>
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <i class="fa-solid fa-key text-base"></i>
+      </span>
+      <input
+        type="password"
+        name="rePassword"
+        formControlName="rePassword"
+        placeholder="Confirm password"
+        class="w-full rounded-xl border bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:bg-white"
+        [class.border-red-400]="hasError('rePassword')"
+        [class.focus:border-red-500]="hasError('rePassword')"
+        [class.border-slate-200]="!hasError('rePassword')"
+        [class.focus:border-[#00298d]]="!hasError('rePassword')"
+      />
+    </div>
+    @if (getErrorMessage('rePassword')) {
+      <p class="mt-1 text-xs text-red-500">{{ getErrorMessage('rePassword') }}</p>
+    }
+  </div>
+
+  <!-- Submit Button -->
+  <button
+    type="submit"
+    [disabled]="isLoading()"
+    class="w-full rounded-xl py-3 text-base font-extrabold text-white transition disabled:opacity-60 bg-[#00298d] hover:bg-[#001f6b] cursor-pointer"
+  >
+    Create New Account
+  </button>
+
+  <!-- Server Error (e.g. user already exists) -->
+  <!-- <button
+    type="button"
+    (click)="serverError.set('test error')"
+    class="w-full rounded-xl py-3 text-base font-extrabold text-white transition disabled:opacity-60 bg-[#00298d] hover:bg-[#001f6b] cursor-pointer"
+  >
+    Display Error
+  </button> -->
+
+  @if (serverError() != '') {
+    <div
+      class="rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm font-medium text-red-600"
+    >
+      {{ serverError() }}
+    </div>
+  }
+</form>

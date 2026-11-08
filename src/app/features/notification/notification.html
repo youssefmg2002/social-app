@@ -1,0 +1,151 @@
+<div class="mx-auto max-w-7xl px-3 py-3.5">
+  <main class="min-w-0">
+    <section class="rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
+      <!-- Header -->
+      <div class="border-b border-slate-200 p-4 sm:p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 sm:text-2xl">Notifications</h2>
+            <p class="mt-1 text-sm text-slate-500">Realtime updates for likes, comments, shares, and follows.</p>
+          </div>
+          <button
+            type="button"
+            (click)="markAllAsRead()"
+            [disabled]="unreadCount() === 0"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
+          >
+            <i class="fa-solid fa-check-double text-xs"></i>
+            Mark all as read
+          </button>
+        </div>
+
+        <!-- Filter tabs: All / Unread -->
+        <div class="mt-4 grid grid-cols-2 gap-2 sm:flex sm:items-center">
+          <button
+            type="button"
+            (click)="setFilter('all')"
+            [class]="filter() === 'all' ? 'rounded-full px-4 py-1.5 text-sm font-bold transition bg-[#1877f2] text-white cursor-pointer' : 'inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer'"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            (click)="setFilter('unread')"
+            [class]="filter() === 'unread' ? 'rounded-full px-4 py-1.5 text-sm font-bold transition bg-[#1877f2] text-white cursor-pointer' : 'inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer'"
+          >
+            Unread
+            @if (unreadCount() > 0) {
+              <span class="ml-1.5 rounded-full bg-rose-500 px-1.5 py-0.2 text-[10px] font-bold text-white leading-tight">{{ unreadCount() }}</span>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Notifications List -->
+      <div class="space-y-2 p-3 sm:p-4">
+        @if (isLoading()) {
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="flex animate-pulse items-center gap-3 rounded-2xl border border-slate-100 p-4">
+              <div class="h-11 w-11 rounded-full bg-slate-200"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 w-1/3 rounded bg-slate-200"></div>
+                <div class="h-3 w-1/4 rounded bg-slate-200"></div>
+              </div>
+            </div>
+          }
+        } @else {
+          @for (item of filteredNotifications(); track item._id) {
+            <article
+              (click)="onNotificationClick(item)"
+              class="group relative flex gap-3 rounded-xl border p-3 transition sm:rounded-2xl sm:p-4 border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"
+              [class.bg-blue-50/30]="!item.isRead"
+              [class.border-blue-200]="!item.isRead"
+            >
+              <!-- Avatar with action badge -->
+              <div class="relative shrink-0">
+                <a [routerLink]="['/profile', item.actor._id || item.actor.username]" (click)="$event.stopPropagation()" class="block cursor-pointer">
+                  <img
+                    [alt]="item.actor.name"
+                    class="h-11 w-11 rounded-full object-cover"
+                    [src]="item.actor.photo || defaultPhoto"
+                    (error)="onImageError($event)"
+                  />
+                </a>
+                <span
+                  class="absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white ring-2 ring-white text-[11px]"
+                  [class]="badgeColor(item.type)"
+                >
+                  <i [class]="badgeIcon(item.type)"></i>
+                </span>
+              </div>
+
+              <!-- Notification info -->
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-start justify-between gap-1.5 sm:gap-2">
+                  <p class="text-sm leading-6 text-slate-800">
+                    <a
+                      [routerLink]="['/profile', item.actor._id || item.actor.username]"
+                      (click)="$event.stopPropagation()"
+                      class="font-extrabold hover:text-[#1877f2] hover:underline"
+                    >
+                      {{ item.actor.name }}
+                    </a>
+                    {{ actionText(item) }}
+                  </p>
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="text-xs font-semibold text-slate-500">{{ item.createdAt | timeAgo }}</span>
+                  </div>
+                </div>
+
+                @if (item.body || item.post?.body) {
+                  <p class="mt-0.5 text-sm text-slate-600 truncate">
+                    @if (item.postId) {
+                      <a [routerLink]="['/posts', item.postId]" (click)="$event.stopPropagation(); markOneAsRead(item)" class="hover:underline">
+                        {{ item.body || item.post?.body }}
+                      </a>
+                    } @else {
+                      {{ item.body || item.post?.body }}
+                    }
+                  </p>
+                }
+
+                <div class="mt-2 flex items-center gap-3">
+                  @if (item.isRead) {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                      <i class="fa-solid fa-check text-xs"></i>
+                      Read
+                    </span>
+                  } @else {
+                    <button
+                      type="button"
+                      (click)="markOneAsRead(item, $event)"
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1877f2] hover:underline cursor-pointer"
+                    >
+                      <i class="fa-solid fa-check text-xs"></i>
+                      Mark as read
+                    </button>
+                  }
+
+                  @if (item.postId) {
+                    <a
+                      [routerLink]="['/posts', item.postId]"
+                      (click)="$event.stopPropagation(); markOneAsRead(item)"
+                      class="text-xs font-semibold text-slate-500 hover:text-[#1877f2] hover:underline"
+                    >
+                      View post
+                    </a>
+                  }
+                </div>
+              </div>
+            </article>
+          } @empty {
+            <div class="py-12 text-center text-slate-500">
+              <i class="fa-regular fa-bell-slash text-3xl mb-2 text-slate-300"></i>
+              <p class="text-sm font-semibold">No {{ filter() === 'unread' ? 'unread ' : '' }}notifications</p>
+            </div>
+          }
+        }
+      </div>
+    </section>
+  </main>
+</div>

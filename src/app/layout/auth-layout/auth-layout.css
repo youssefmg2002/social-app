@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  font-family: 'Cairo', sans-serif;
+}
+
+.auth-wrapper,
+.auth-wrapper * {
+  font-family: 'Cairo', sans-serif;
+}

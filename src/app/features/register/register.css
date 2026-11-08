@@ -1,0 +1,24 @@
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+input,
+select,
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.register-select:invalid,
+.register-select option[value=""] {
+  color: #9ca3af;
+}
+
+.register-select option {
+  color: #1f2937;
+}

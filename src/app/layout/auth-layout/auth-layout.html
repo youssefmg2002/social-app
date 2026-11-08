@@ -1,0 +1,101 @@
+<div
+  class="auth-wrapper min-h-screen bg-[#f0f2f5] px-4 py-8 sm:py-12 lg:flex lg:items-center"
+  style="font-family: 'Cairo', sans-serif"
+>
+  <div
+    class="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-between"
+  >
+    <!-- Left Column: Route Posts Brand & Route Academy Information -->
+    <section class="order-2 w-full max-w-xl text-center lg:order-1 lg:text-left">
+      <div class="hidden items-center gap-3.5 lg:flex">
+        <img alt="Route Posts" class="h-14 w-14 rounded-2xl object-cover shadow-sm" src="assets/route.png" />
+        <h1 class="text-5xl font-extrabold tracking-tight text-[#00298d] sm:text-6xl">
+          Route Posts
+        </h1>
+      </div>
+      <p class="hidden mt-4 text-2xl font-medium leading-snug text-slate-800 lg:block">
+        Connect with friends and the world around you on Route Posts.
+      </p>
+      <div
+        class="mt-6 rounded-2xl border border-[#c9d5ff] bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5"
+      >
+        <p class="text-sm font-extrabold uppercase tracking-[0.14em] text-[#00298d]">
+          About Route Academy
+        </p>
+        <p class="mt-1 text-lg font-bold text-slate-900">
+          Egypt's Leading IT Training Center Since 2012
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-slate-700">
+          Route Academy is the premier IT training center in Egypt, established in 2012. We
+          specialize in delivering high-quality training courses in programming, web development,
+          and application development. We've identified the unique challenges people may face when
+          learning new technology and made efforts to provide strategies to overcome them.
+        </p>
+        <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div class="rounded-xl border border-[#c9d5ff] bg-[#f2f6ff] px-3 py-2">
+            <p class="text-base font-extrabold text-[#00298d]">2012</p>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600">Founded</p>
+          </div>
+          <div class="rounded-xl border border-[#c9d5ff] bg-[#f2f6ff] px-3 py-2">
+            <p class="text-base font-extrabold text-[#00298d]">40K+</p>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600">Graduates</p>
+          </div>
+          <div class="rounded-xl border border-[#c9d5ff] bg-[#f2f6ff] px-3 py-2">
+            <p class="text-base font-extrabold text-[#00298d]">50+</p>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600">
+              Partner Companies
+            </p>
+          </div>
+          <div class="rounded-xl border border-[#c9d5ff] bg-[#f2f6ff] px-3 py-2">
+            <p class="text-base font-extrabold text-[#00298d]">5</p>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600">Branches</p>
+          </div>
+          <div class="rounded-xl border border-[#c9d5ff] bg-[#f2f6ff] px-3 py-2">
+            <p class="text-base font-extrabold text-[#00298d]">20</p>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600">
+              Diplomas Available
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Auth Card (Login / Register) -->
+    <section class="order-1 w-full max-w-107.5 lg:order-2">
+      <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
+        <!-- Mobile Header -->
+        <div class="mb-4 text-center lg:hidden">
+          <div class="mb-2 flex items-center justify-center gap-2.5">
+            <img alt="Route Posts" class="h-10 w-10 rounded-xl object-cover shadow-sm" src="assets/route.png" />
+            <h1 class="text-3xl font-extrabold tracking-tight text-[#00298d]">Route Posts</h1>
+          </div>
+          <p class="mt-1 text-base font-medium leading-snug text-slate-700">
+            Connect with friends and the world around you on Route Posts.
+          </p>
+        </div>
+
+        <!-- Auth Navigation Tabs -->
+        <div class="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
+          <a
+            routerLink="/login"
+            routerLinkActive="bg-white text-[#00298d] shadow-sm"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="rounded-lg py-2 text-center text-sm font-extrabold text-slate-600 transition hover:text-slate-800"
+          >
+            Login
+          </a>
+          <a
+            routerLink="/register"
+            routerLinkActive="bg-white text-[#00298d] shadow-sm"
+            class="rounded-lg py-2 text-center text-sm font-extrabold text-slate-600 transition hover:text-slate-800"
+          >
+            Register
+          </a>
+        </div>
+
+        <!-- Dynamic Auth Form (Login or Register Component) -->
+        <router-outlet></router-outlet>
+      </div>
+    </section>
+  </div>
+</div>

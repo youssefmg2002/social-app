@@ -1,0 +1,81 @@
+<div class="w-[340px] max-w-full overflow-hidden rounded-xl bg-white" (click)="$event.stopPropagation()">
+  <!-- Search -->
+  <div class="flex items-center gap-2 px-3 pb-1 pt-3">
+    <div class="relative flex-1">
+      <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500"></i>
+      <input
+        type="search"
+        placeholder="Search"
+        autocomplete="off"
+        [value]="search()"
+        (input)="onSearch($event)"
+        class="w-full rounded-xl border-0 bg-slate-100 py-2.5 pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-500 focus:bg-white focus:ring-1 focus:ring-[#1877f2]"
+      />
+    </div>
+    <span class="inline-block h-4 w-4 shrink-0 rounded-full bg-[#ffc93a] shadow-inner"></span>
+  </div>
+
+  <!-- Emojis -->
+  <div #scrollArea (scroll)="onScroll()" class="relative h-[300px] overflow-y-auto px-3">
+    @if (search().trim()) {
+      <p class="sticky top-0 z-10 bg-white/90 py-1.5 text-sm font-medium text-slate-700 backdrop-blur-xs">Search results</p>
+      <div class="grid grid-cols-8">
+        @for (emoji of searchResults(); track emoji.char) {
+          <button
+            type="button"
+            [title]="emoji.name"
+            (click)="pick(emoji.char)"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-2xl leading-none transition hover:bg-slate-100 cursor-pointer"
+          >
+            {{ emoji.char }}
+          </button>
+        } @empty {
+          <p class="col-span-8 py-8 text-center text-sm text-slate-500">No emoji found</p>
+        }
+      </div>
+    } @else {
+      @for (category of categories(); track category.id) {
+        <section [attr.data-category]="category.id">
+          <p class="sticky top-0 z-10 bg-white/90 py-1.5 text-sm font-medium text-slate-700 backdrop-blur-xs">{{ category.label }}</p>
+          <div class="grid grid-cols-8">
+            @for (emoji of category.emojis; track emoji.char) {
+              <button
+                type="button"
+                [title]="emoji.name"
+                (click)="pick(emoji.char)"
+                class="flex h-9 w-9 items-center justify-center rounded-full text-2xl leading-none transition hover:bg-slate-100 cursor-pointer"
+              >
+                {{ emoji.char }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+
+  <!-- Category tabs -->
+  <nav class="relative border-t border-slate-100 px-3 py-2.5">
+    <div class="relative flex">
+      @for (category of categories(); track category.id) {
+        <button
+          type="button"
+          [title]="category.label"
+          (click)="goToCategory(category.id)"
+          class="flex flex-1 items-center justify-center py-1 text-base transition cursor-pointer"
+          [class.text-[#2266ed]]="activeCategory() === category.id"
+          [class.text-slate-500]="activeCategory() !== category.id"
+          [class.hover:text-slate-800]="activeCategory() !== category.id"
+        >
+          <i [class]="category.icon"></i>
+        </button>
+      }
+      <span
+        class="absolute -bottom-2.5 left-0 h-[3px] rounded-t bg-[#2266ed] transition-transform duration-200"
+        [style.width.%]="100 / categories().length"
+        [style.transform]="'translateX(' + activeIndex() * 100 + '%)'"
+      ></span>
+    </div>
+  </nav>
+</div>
+

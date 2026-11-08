@@ -1,0 +1,116 @@
+<div class="mx-auto max-w-7xl px-3 py-3.5">
+  <main class="min-w-0">
+    <div class="mx-auto max-w-4xl space-y-4">
+      <!-- Back to feed button -->
+      <button
+        type="button"
+        (click)="goBack()"
+        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50 cursor-pointer"
+      >
+        <i class="fa-solid fa-arrow-left text-xs"></i>
+        Back to feed
+      </button>
+
+      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <!-- Header -->
+        <div class="mb-3 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-users text-[#1877f2] text-lg"></i>
+            <h1 class="text-xl font-extrabold text-slate-900">All Suggested Friends</h1>
+          </div>
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">{{ filteredUsers().length }}</span>
+        </div>
+
+        <!-- Search bar -->
+        <label class="relative mb-4 block">
+          <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input
+            placeholder="Search by name or username..."
+            [value]="search()"
+            (input)="onSearch($event)"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none focus:border-[#1877f2] focus:bg-white"
+          />
+        </label>
+
+        <!-- Grid of suggested friends -->
+        @if (isLoading()) {
+          <div class="grid gap-3 sm:grid-cols-2">
+            @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+              <div class="flex animate-pulse items-center gap-3 rounded-xl border border-slate-200 p-3">
+                <div class="h-12 w-12 rounded-full bg-slate-200"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 w-1/2 rounded bg-slate-200"></div>
+                  <div class="h-3 w-1/3 rounded bg-slate-200"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="grid gap-3 sm:grid-cols-2">
+            @for (friend of filteredUsers(); track friend._id) {
+              <article class="rounded-xl border border-slate-200 p-3">
+                <div class="flex items-center justify-between gap-3">
+                  <a [routerLink]="['/profile', friend._id || friend.username]" class="flex min-w-0 items-center gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-slate-50">
+                    <img
+                      [alt]="friend.name"
+                      class="h-12 w-12 rounded-full object-cover shrink-0"
+                      [src]="friend.photo || defaultPhoto"
+                      (error)="onImageError($event)"
+                    />
+                    <div class="min-w-0">
+                      <p class="truncate text-sm font-bold text-slate-900 hover:underline">{{ friend.name }}</p>
+                      <p class="truncate text-xs text-slate-500">&#64;{{ friend.username }}</p>
+                    </div>
+                  </a>
+
+                  <button
+                    type="button"
+                    (click)="toggleFollow(friend)"
+                    class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition cursor-pointer"
+                    [class]="isFollowing(friend._id) ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-[#e7f3ff] text-[#1877f2] hover:bg-[#d8ebff]'"
+                  >
+                    @if (isFollowing(friend._id)) {
+                      <i class="fa-solid fa-user-check text-[11px]"></i>
+                      Following
+                    } @else {
+                      <i class="fa-solid fa-user-plus text-[11px]"></i>
+                      Follow
+                    }
+                  </button>
+                </div>
+
+                <div class="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                  <span class="rounded-full bg-slate-100 px-2 py-0.5">{{ friend.followers }} followers</span>
+                  @if (friend.mutual) {
+                    <span class="rounded-full bg-[#edf4ff] px-2 py-0.5 text-[#1877f2]">{{ friend.mutual }} mutual</span>
+                  }
+                </div>
+              </article>
+            } @empty {
+              <div class="col-span-full py-8 text-center text-sm font-medium text-slate-500">
+                No users found matching your search.
+              </div>
+            }
+          </div>
+
+          @if (hasMore() && !search().trim()) {
+            <button
+              type="button"
+              (click)="loadMore()"
+              [disabled]="isLoadingMore()"
+              class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 cursor-pointer"
+            >
+              @if (isLoadingMore()) {
+                <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                Loading...
+              } @else {
+                Load more users
+              }
+            </button>
+          }
+        }
+      </section>
+    </div>
+  </main>
+</div>
+

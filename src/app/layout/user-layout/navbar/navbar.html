@@ -1,0 +1,87 @@
+<header class="sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-2 py-1.5 sm:gap-3 sm:px-3">
+    <!-- Brand -->
+    <a routerLink="/feed" class="flex items-center gap-3">
+      <img alt="Route Posts" class="h-9 w-9 rounded-xl object-cover" src="assets/route.png" />
+      <p class="hidden text-xl font-extrabold text-slate-900 sm:block">Route Posts</p>
+    </a>
+
+    <!-- Main links -->
+    <nav class="flex min-w-0 items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/90 px-1 py-1 sm:px-1.5">
+      <a
+        routerLink="/feed"
+        routerLinkActive="bg-white !text-[#1f6fe5]"
+        class="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-extrabold text-slate-600 transition hover:bg-white/90 hover:text-slate-900 sm:gap-2 sm:px-3.5"
+      >
+        <i class="fa-solid fa-house text-base"></i>
+        <span class="hidden sm:inline">Feed</span>
+        <span class="sr-only sm:hidden">Feed</span>
+      </a>
+      <a
+        routerLink="/profile"
+        routerLinkActive="bg-white !text-[#1f6fe5]"
+        class="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-extrabold text-slate-600 transition hover:bg-white/90 hover:text-slate-900 sm:gap-2 sm:px-3.5"
+      >
+        <i class="fa-solid fa-user text-base"></i>
+        <span class="hidden sm:inline">Profile</span>
+        <span class="sr-only sm:hidden">Profile</span>
+      </a>
+      <a
+        routerLink="/notifications"
+        routerLinkActive="bg-white !text-[#1f6fe5]"
+        class="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-extrabold text-slate-600 transition hover:bg-white/90 hover:text-slate-900 sm:gap-2 sm:px-3.5"
+      >
+        <i class="fa-solid fa-comment-dots text-base"></i>
+        <span class="hidden sm:inline">Notifications</span>
+        <span class="sr-only sm:hidden">Notifications</span>
+      </a>
+    </nav>
+
+    <!-- User menu -->
+    <div class="relative">
+      <button
+        type="button"
+        (click)="toggleMenu($event)"
+        class="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 transition hover:bg-slate-50 cursor-pointer"
+      >
+        <img [alt]="user?.name" class="h-8 w-8 rounded-full object-cover" [src]="user?.photo || defaultPhoto" />
+        <span class="hidden max-w-[140px] truncate text-sm font-semibold text-slate-800 md:block">{{ user?.name }}</span>
+        <i class="fa-solid fa-bars text-sm text-slate-600"></i>
+      </button>
+
+      @if (menuOpen()) {
+        <div class="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl">
+          <a
+            routerLink="/profile"
+            (click)="closeMenu()"
+            routerLinkActive="bg-[#f0f4f9] !text-[#1e3a5f]"
+            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            <i class="fa-solid fa-user text-base text-slate-600"></i>
+            <span>Profile</span>
+          </a>
+
+          <a
+            routerLink="/settings"
+            (click)="closeMenu()"
+            routerLinkActive="bg-[#f0f4f9] !text-[#1e3a5f]"
+            class="mt-0.5 flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            <i class="fa-solid fa-gear text-base text-slate-600"></i>
+            <span>Settings</span>
+          </a>
+
+          <div class="my-1.5 border-t border-slate-200/80"></div>
+
+          <button
+            type="button"
+            (click)="logout()"
+            class="flex w-full items-center rounded-xl px-3.5 py-2 text-left text-sm font-semibold text-[#e11d48] transition hover:bg-rose-50 cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

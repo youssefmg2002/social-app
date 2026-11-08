@@ -1,0 +1,69 @@
+<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="mb-3 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-user-group text-[#1877f2] text-sm"></i>
+      <h3 class="text-base font-extrabold text-slate-900">Suggested Friends</h3>
+    </div>
+    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">{{ filteredFriends().length }}</span>
+  </div>
+
+  <div class="mb-3">
+    <label class="relative block">
+      <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+      <input
+        placeholder="Search friends..."
+        [value]="search()"
+        (input)="onSearch($event)"
+        class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none focus:border-[#1877f2] focus:bg-white"
+      />
+    </label>
+  </div>
+
+  <div class="space-y-3">
+    @for (friend of filteredFriends(); track friend._id) {
+      <div class="rounded-xl border border-slate-200 p-2.5 transition hover:bg-slate-50/50">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex min-w-0 items-center gap-2 rounded-lg px-1 py-1">
+            <a [routerLink]="['/profile', friend._id || friend.username]" class="shrink-0">
+              <img
+                [alt]="friend.name"
+                class="h-10 w-10 rounded-full object-cover"
+                [src]="friend.photo || defaultPhoto"
+                (error)="onImageError($event)"
+              />
+            </a>
+            <div class="min-w-0">
+              <a [routerLink]="['/profile', friend._id || friend.username]" class="truncate text-sm font-bold text-slate-900 hover:underline block">
+                {{ friend.name }}
+              </a>
+              <p class="truncate text-xs text-slate-500">&#64;{{ friend.username }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="followFriend(friend)"
+            class="inline-flex items-center gap-1.5 rounded-full bg-[#e7f3ff] px-3 py-1.5 text-xs font-bold text-[#1877f2] transition hover:bg-[#d8ebff] cursor-pointer"
+          >
+            <i class="fa-solid fa-user-plus text-[11px]"></i>
+            Follow
+          </button>
+        </div>
+        <div class="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+          <span class="rounded-full bg-slate-100 px-2 py-0.5">{{ friend.followers }} followers</span>
+          @if (friend.mutual) {
+            <span class="rounded-full bg-[#edf4ff] px-2 py-0.5 text-[#1877f2]">{{ friend.mutual }} mutual</span>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="py-4 text-center text-sm text-slate-500">No friends match your search.</p>
+    }
+  </div>
+
+  <a
+    [routerLink]="['/suggestions']"
+    class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 cursor-pointer text-center block"
+  >
+    View more
+  </a>
+</div>

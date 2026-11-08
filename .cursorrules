@@ -1,0 +1,7 @@
+# Rules
+
+## Iconography
+- Always use Font Awesome icons (`<i class="fa-solid fa-..." ></i>`, `<i class="fa-regular fa-..." ></i>`, `<i class="fa-brands fa-..." ></i>`) for any UI icons across all Angular templates.
+- Never use inline `<svg>` elements for icons.
+- Font Awesome Free styles are imported globally via `angular.json`.
+

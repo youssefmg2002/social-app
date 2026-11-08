@@ -1,0 +1,463 @@
+<div class="border-t border-slate-200 bg-[#f7f8fa] px-4 py-4">
+  <!-- Header -->
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+    <div class="flex items-center gap-2">
+      <p class="text-sm font-extrabold tracking-wide text-slate-700">Comments</p>
+      <span class="rounded-full bg-[#e7f3ff] px-2 py-0.5 text-[11px] font-bold text-[#1877f2]">{{ totalCount() }}</span>
+    </div>
+    <select
+      [value]="sort()"
+      (change)="onSortChange($event)"
+      class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none ring-[#1877f2]/20 focus:border-[#1877f2] focus:bg-white focus:ring-2 cursor-pointer"
+    >
+      <option value="relevant">Most relevant</option>
+      <option value="newest">Newest</option>
+    </select>
+  </div>
+
+  <!-- Comments List -->
+  <div class="space-y-3">
+    @if (isLoading()) {
+      @for (i of [1, 2, 3]; track i) {
+        <div class="flex animate-pulse items-start gap-2">
+          <div class="mt-0.5 h-8 w-8 rounded-full bg-slate-200"></div>
+          <div class="h-14 w-2/3 rounded-2xl bg-slate-200"></div>
+        </div>
+      }
+    } @else if (errorMessage()) {
+      <div class="rounded-xl border border-red-200 bg-red-50 p-3 text-center text-sm font-medium text-red-600">
+        <p>{{ errorMessage() }}</p>
+        <button type="button" (click)="loadComments(1)" class="mt-1 text-xs font-bold text-[#1877f2] hover:underline cursor-pointer">Try again</button>
+      </div>
+    } @else {
+      @for (comment of sortedComments(); track comment._id) {
+        @let a = author(comment);
+        <div class="space-y-2">
+          <!-- Parent Comment -->
+          <div class="relative flex items-start gap-2">
+            @if (a._id) {
+              <a [routerLink]="['/profile', a._id]" class="shrink-0">
+                <img [alt]="a.name" class="mt-0.5 h-8 w-8 rounded-full object-cover" [src]="a.photo" (error)="onImageError($event)" />
+              </a>
+            } @else {
+              <img [alt]="a.name" class="mt-0.5 h-8 w-8 rounded-full object-cover" [src]="a.photo" (error)="onImageError($event)" />
+            }
+            <div class="min-w-0 flex-1">
+              <!-- Comment Bubble -->
+              <div class="relative inline-block max-w-full rounded-2xl bg-[#f0f2f5] px-3.5 py-2.5">
+                @if (a._id) {
+                  <a [routerLink]="['/profile', a._id]" class="text-xs font-bold text-slate-900 hover:underline block leading-tight">
+                    {{ a.name }}
+                  </a>
+                } @else {
+                  <p class="text-xs font-bold text-slate-900 leading-tight">{{ a.name }}</p>
+                }
+                <p class="text-xs text-slate-500 mt-0.5">
+                  @if (a.username) {
+                    &#64;{{ a.username }} ·
+                  }
+                  {{ comment.createdAt | timeAgo }}
+                </p>
+
+                @if (editingCommentId() === comment._id) {
+                  <!-- Inline Edit Mode -->
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <input
+                      type="text"
+                      [value]="editingCommentText()"
+                      (input)="onEditingCommentInput($event)"
+                      (keydown.enter)="saveEditComment(comment)"
+                      (keydown.escape)="cancelEditComment()"
+                      class="min-w-[140px] flex-1 rounded-full border border-slate-300 bg-white px-3.5 py-1 text-sm text-slate-800 outline-none ring-1 ring-transparent focus:border-[#1877f2] focus:ring-[#1877f2]"
+                      placeholder="Edit comment..."
+                    />
+                    <button
+                      type="button"
+                      (click)="saveEditComment(comment)"
+                      [disabled]="!editingCommentText().trim() || isSavingComment()"
+                      class="rounded-full bg-[#1877f2] px-4 py-1 text-xs font-bold text-white transition hover:bg-[#166fe5] disabled:opacity-50 cursor-pointer"
+                    >
+                      @if (isSavingComment()) {
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                      } @else {
+                        Save
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      (click)="cancelEditComment()"
+                      class="rounded-full border border-slate-300 bg-white px-3.5 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                } @else {
+                  @if (comment.content || comment.body) {
+                    <p class="mt-1.5 whitespace-pre-wrap text-sm text-slate-800">{{ comment.content || comment.body }}</p>
+                  }
+                  @if (comment.image) {
+                    <img alt="Comment attachment" class="mt-2 max-h-52 w-full rounded-lg object-cover" [src]="comment.image" />
+                  }
+                }
+              </div>
+
+              <!-- Comment Action Bar -->
+              <div class="mt-1 flex items-center justify-between px-1">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-semibold text-slate-400">{{ comment.createdAt | timeAgo }}</span>
+                  <button
+                    type="button"
+                    (click)="toggleCommentLike(comment)"
+                    [class.text-[#1877f2]]="isCommentLiked(comment)"
+                    [class.text-slate-500]="!isCommentLiked(comment)"
+                    class="text-xs font-semibold hover:underline cursor-pointer"
+                  >
+                    Like{{ getCommentLikesCount(comment) > 0 ? ' (' + getCommentLikesCount(comment) + ')' : '' }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="toggleReplies(comment)"
+                    [class.text-[#1877f2]]="isRepliesExpanded(comment._id)"
+                    [class.text-slate-500]="!isRepliesExpanded(comment._id)"
+                    class="text-xs font-semibold hover:underline cursor-pointer"
+                  >
+                    {{ isRepliesExpanded(comment._id) ? 'Hide replies' : ((getReplies(comment).length || comment.repliesCount) ? 'Reply (' + (getReplies(comment).length || comment.repliesCount) + ')' : 'Reply') }}
+                  </button>
+                </div>
+
+                <!-- Comment Options Menu -->
+                <div class="relative">
+                  <button
+                    type="button"
+                    (click)="toggleCommentMenu(comment._id, $event)"
+                    class="text-slate-400 hover:text-slate-600 transition p-0.5 cursor-pointer"
+                    aria-label="Comment options"
+                  >
+                    <i class="fa-solid fa-ellipsis"></i>
+                  </button>
+
+                  @if (activeMenuCommentId() === comment._id) {
+                    <div class="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-lg">
+                      @if (isCommentOwner(comment)) {
+                        <button
+                          type="button"
+                          (click)="startEditComment(comment)"
+                          class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+                        >
+                          <i class="fa-solid fa-pen text-slate-600 text-xs"></i>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          (click)="deleteComment(comment)"
+                          class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 cursor-pointer"
+                        >
+                          <i class="fa-regular fa-trash-can text-rose-600 text-xs"></i>
+                          Delete
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indented Thread (Vertical Line Guide) -->
+          @if (isRepliesExpanded(comment._id)) {
+            <div class="relative ml-4 border-l-2 border-slate-200 pl-3.5 space-y-3">
+              @if (loadingReplies().has(comment._id) && getReplies(comment).length === 0) {
+                <div class="flex items-center gap-2 py-1 text-xs text-slate-500 font-semibold">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i>
+                  Loading replies...
+                </div>
+              }
+
+              <!-- Replies List -->
+              @for (reply of getReplies(comment); track reply._id) {
+                @let ra = replyAuthor(reply);
+                <div class="relative flex items-start gap-2">
+                  @if (ra._id) {
+                    <a [routerLink]="['/profile', ra._id]" class="shrink-0">
+                      <img [alt]="ra.name" class="mt-0.5 h-7 w-7 rounded-full object-cover" [src]="ra.photo" (error)="onImageError($event)" />
+                    </a>
+                  } @else {
+                    <img [alt]="ra.name" class="mt-0.5 h-7 w-7 rounded-full object-cover" [src]="ra.photo" (error)="onImageError($event)" />
+                  }
+                  <div class="min-w-0 flex-1">
+                    <!-- Reply Bubble -->
+                    <div class="relative inline-block max-w-full rounded-2xl bg-[#f0f2f5] px-3.5 py-2">
+                      @if (ra._id) {
+                        <a [routerLink]="['/profile', ra._id]" class="text-xs font-bold text-slate-900 hover:underline block leading-tight">
+                          {{ ra.name }}
+                        </a>
+                      } @else {
+                        <p class="text-xs font-bold text-slate-900 leading-tight">{{ ra.name }}</p>
+                      }
+                      <span class="text-[11px] text-slate-500 block mt-0.5">{{ reply.createdAt | timeAgo }}</span>
+
+                      @if (editingReplyId() === reply._id) {
+                        <!-- Inline Edit Reply -->
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                          <input
+                            type="text"
+                            [value]="editingReplyText()"
+                            (input)="onEditingReplyInput($event)"
+                            (keydown.enter)="saveEditReply(comment, reply)"
+                            (keydown.escape)="cancelEditReply()"
+                            class="min-w-[120px] flex-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs text-slate-800 outline-none ring-1 ring-transparent focus:border-[#1877f2] focus:ring-[#1877f2]"
+                            placeholder="Edit reply..."
+                          />
+                          <button
+                            type="button"
+                            (click)="saveEditReply(comment, reply)"
+                            [disabled]="!editingReplyText().trim() || isSavingReply()"
+                            class="rounded-full bg-[#1877f2] px-3.5 py-1 text-xs font-bold text-white transition hover:bg-[#166fe5] disabled:opacity-50 cursor-pointer"
+                          >
+                            @if (isSavingReply()) {
+                              <i class="fa-solid fa-circle-notch fa-spin"></i>
+                            } @else {
+                              Save
+                            }
+                          </button>
+                          <button
+                            type="button"
+                            (click)="cancelEditReply()"
+                            class="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      } @else {
+                        @if (reply.content || reply.body) {
+                          <p class="mt-1 whitespace-pre-wrap text-sm text-slate-800">{{ reply.content || reply.body }}</p>
+                        }
+                        @if (reply.image) {
+                          <img alt="Reply attachment" class="mt-2 max-h-40 w-full rounded-lg object-cover" [src]="reply.image" />
+                        }
+                      }
+                    </div>
+
+                    <!-- Reply Actions -->
+                    <div class="mt-1 flex items-center gap-3 px-1">
+                      <button
+                        type="button"
+                        (click)="toggleReplyLike(comment, reply)"
+                        [class.text-[#1877f2]]="isReplyLiked(reply)"
+                        [class.text-slate-500]="!isReplyLiked(reply)"
+                        class="text-xs font-semibold hover:underline cursor-pointer"
+                      >
+                        Like{{ getReplyLikesCount(reply) > 0 ? ' (' + getReplyLikesCount(reply) + ')' : '' }}
+                      </button>
+
+                      <!-- Reply Options Menu -->
+                      <div class="relative">
+                        <button
+                          type="button"
+                          (click)="toggleReplyMenu(reply._id, $event)"
+                          class="text-slate-400 hover:text-slate-600 transition p-0.5 cursor-pointer"
+                          aria-label="Reply options"
+                        >
+                          <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+
+                        @if (activeMenuReplyId() === reply._id) {
+                          <div class="absolute left-0 top-full mt-1 z-30 min-w-[130px] rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-lg">
+                            @if (isReplyOwner(reply)) {
+                              <button
+                                type="button"
+                                (click)="startEditReply(reply)"
+                                class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+                              >
+                                <i class="fa-solid fa-pen text-slate-600 text-xs"></i>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                (click)="deleteReply(comment, reply)"
+                                class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 cursor-pointer"
+                              >
+                                <i class="fa-regular fa-trash-can text-rose-600 text-xs"></i>
+                                Delete
+                              </button>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Replying To Header & Inline Reply Input -->
+              @if (replyingToCommentId() === comment._id) {
+                <div class="pt-1">
+                  <p class="text-xs font-semibold text-slate-500 mb-1.5">
+                    Replying to {{ a.name }}
+                  </p>
+                  <div class="flex items-start gap-2">
+                    <img [alt]="user?.name" class="mt-0.5 h-8 w-8 rounded-full object-cover shrink-0" [src]="user?.photo || defaultPhoto" (error)="onImageError($event)" />
+                    <div class="flex-1 rounded-2xl border border-slate-200 bg-[#f0f2f5] px-3 py-2 focus-within:border-[#c7dafc] focus-within:bg-white">
+                      <textarea
+                        #replyInput
+                        rows="1"
+                        placeholder="Write a reply..."
+                        [value]="replyContent()"
+                        (input)="onReplyContentInput($event)"
+                        (keydown)="onReplyKeydown($event, comment)"
+                        class="max-h-[120px] min-h-[36px] w-full resize-none border-none bg-transparent px-1 py-1 text-sm leading-5 shadow-none outline-none ring-0 placeholder:text-slate-500 focus:border-none focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      ></textarea>
+
+                      @if (replyImagePreview(); as preview) {
+                        <div class="relative mb-1 ml-1 inline-block">
+                          <img [src]="preview" alt="Reply preview" class="max-h-24 rounded-lg object-cover" />
+                          <button
+                            type="button"
+                            (click)="removeReplyImage()"
+                            class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/75 cursor-pointer"
+                            aria-label="Remove reply image"
+                          >
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                          </button>
+                        </div>
+                      }
+
+                      <div class="mt-1 flex items-center justify-between">
+                        <div class="flex items-center gap-1">
+                          <label class="inline-flex cursor-pointer items-center justify-center rounded-full p-1.5 text-slate-500 transition hover:bg-slate-200 hover:text-emerald-600" aria-label="Attach photo to reply">
+                            <i class="fa-regular fa-image text-sm"></i>
+                            <input accept="image/*" class="hidden" type="file" (change)="onReplyImageSelected($event)" />
+                          </label>
+                          <button
+                            type="button"
+                            (click)="toggleReplyEmoji($event)"
+                            class="inline-flex items-center justify-center rounded-full p-1.5 text-slate-500 transition hover:bg-slate-200 hover:text-amber-500 cursor-pointer"
+                            [class.text-amber-500]="showReplyEmoji()"
+                            aria-label="Add emoji to reply"
+                          >
+                            <i class="fa-regular fa-face-smile text-sm"></i>
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="submitReply(comment)"
+                          [disabled]="!canSubmitReply()"
+                          class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877f2] text-white transition hover:bg-[#166fe5] disabled:opacity-40 disabled:hover:bg-[#1877f2] cursor-pointer"
+                          aria-label="Send reply"
+                        >
+                          @if (isSubmittingReply()) {
+                            <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                          } @else {
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                          }
+                        </button>
+                      </div>
+
+                      @if (showReplyEmoji()) {
+                        <div class="relative mt-2">
+                          <app-emoji-picker (emojiSelect)="addReplyEmoji($event)" (close)="showReplyEmoji.set(false)" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="py-3 text-center text-sm font-medium text-slate-500">No comments yet. Be the first to comment.</p>
+      }
+
+      @if (hasMore()) {
+        <div class="pt-2 text-center">
+          <button
+            type="button"
+            (click)="loadMore()"
+            [disabled]="isLoadingMore()"
+            class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 cursor-pointer"
+          >
+            @if (isLoadingMore()) {
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              Loading...
+            } @else {
+              View more comments
+            }
+          </button>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Add comment -->
+  <div class="mt-4">
+    <div class="flex items-start gap-2">
+      <img [alt]="user?.name" class="h-9 w-9 rounded-full object-cover shrink-0" [src]="user?.photo || defaultPhoto" (error)="onImageError($event)" />
+      <div class="w-full rounded-2xl border border-slate-200 bg-[#f0f2f5] px-2.5 py-1.5 focus-within:border-[#c7dafc] focus-within:bg-white">
+        <textarea
+          #commentInput
+          rows="1"
+          [placeholder]="'Comment as ' + (user?.name || 'you') + '...'"
+          [value]="content()"
+          (input)="onContentInput($event)"
+          (keydown)="onKeydown($event)"
+          class="max-h-[140px] min-h-[40px] w-full resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-5 shadow-none outline-none ring-0 placeholder:text-slate-500 focus:border-none focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+        ></textarea>
+
+        @if (imagePreview(); as preview) {
+          <div class="relative mb-1 ml-2 inline-block">
+            <img [src]="preview" alt="Selected image" class="max-h-32 rounded-lg object-cover" />
+            <button
+              type="button"
+              (click)="removeImage()"
+              class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/75 cursor-pointer"
+              aria-label="Remove image"
+            >
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+        }
+
+        <div class="mt-1 flex items-center justify-between">
+          <div class="flex items-center gap-1">
+            <label class="inline-flex cursor-pointer items-center justify-center rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-emerald-600" aria-label="Add image">
+              <i class="fa-regular fa-image text-sm"></i>
+              <input accept="image/*" class="hidden" type="file" (change)="onImageSelected($event)" />
+            </label>
+            <button
+              type="button"
+              (click)="toggleEmoji($event)"
+              class="inline-flex items-center justify-center rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-amber-500 cursor-pointer"
+              [class.text-amber-500]="showEmoji()"
+              aria-label="Add emoji"
+            >
+              <i class="fa-regular fa-face-smile text-sm"></i>
+            </button>
+          </div>
+          <button
+            type="button"
+            (click)="submit()"
+            [disabled]="!canSubmit()"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877f2] text-white transition hover:bg-[#166fe5] disabled:opacity-40 disabled:hover:bg-[#1877f2] cursor-pointer"
+            aria-label="Send comment"
+          >
+            @if (isSubmitting()) {
+              <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+            } @else {
+              <i class="fa-solid fa-paper-plane text-xs"></i>
+            }
+          </button>
+        </div>
+
+        @if (showEmoji()) {
+          <div class="relative mt-2">
+            <app-emoji-picker (emojiSelect)="addEmoji($event)" (close)="showEmoji.set(false)" />
+          </div>
+        }
+      </div>
+    </div>
+    @if (submitError()) {
+      <p class="mt-1.5 text-xs text-red-500">{{ submitError() }}</p>
+    }
+  </div>
+</div>
