@@ -145,7 +145,6 @@ export class Register {
         this.isLoading.set(false);
         this.serverError.set('');
         console.log('Registration success', res);
-        this.authService.saveSession(res);
         this.routerService.navigate(['/login']);
       },
       error: (err) => {
